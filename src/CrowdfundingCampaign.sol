@@ -77,19 +77,34 @@ contract CrowdfundingCampaign {
         require(block.timestamp >= deadline, "Campaign not ended yet");
         require(!fundsReleased, "Funds already released");
         
-        bool success = isFlexible || totalContributions >= goal;
-        require(success || (totalVotes * 100) / totalContributions > 50, "Not enough votes");
-        
-        uint256 fee = (totalContributions * platformFeePercentage) / 100;
-        uint256 amount = totalContributions - fee;
+        if (!isFlexible) {
+            bool success = totalContributions >= goal;
+            require(success || (totalVotes * 100) / totalContributions > 50, "Not enough votes");
+        }
         
         fundsReleased = true;
-        payable(creator).transfer(amount);
-        if (fee > 0) {
-            payable(msg.sender).transfer(fee); // Platform fee goes to factory
+        uint256 amount;
+        uint256 fee;
+        
+        if (isFlexible) {
+            // For flexible funding, send full amount to creator
+            amount = totalContributions;
+            fee = 0;
+            (bool sent, ) = payable(creator).call{value: amount}("");
+            require(sent, "Failed to send Ether to creator");
+        } else {
+            // For fixed funding, apply platform fee
+            fee = (totalContributions * platformFeePercentage) / 100;
+            amount = totalContributions - fee;
+            (bool sent, ) = payable(creator).call{value: amount}("");
+            require(sent, "Failed to send Ether to creator");
+            if (fee > 0) {
+                (bool feeSent, ) = payable(msg.sender).call{value: fee}("");
+                require(feeSent, "Failed to send platform fee");
+            }
         }
         
         emit FundsReleased(amount, fee);
-        emit CampaignCompleted(success);
+        emit CampaignCompleted(isFlexible || totalContributions >= goal);
     }
 }
