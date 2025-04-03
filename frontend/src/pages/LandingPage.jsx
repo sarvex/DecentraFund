@@ -92,38 +92,12 @@ export default function LandingPage() {
                 >
                   Explore Projects
                 </Link>
-                <button
-                  onClick={() => console.log("Connect wallet clicked")}
-                  className="relative overflow-hidden px-8 py-4 rounded-full font-semibold text-lg group"
+                <Link
+                  to="/dashboard"
+                  className="border-2 border-white text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover:bg-white/10 text-center"
                 >
-                  {/* Animated border */}
-                  <span className="absolute inset-0 border-2 border-white rounded-full overflow-hidden">
-                    <span className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-all duration-500"></span>
-                    <span className="absolute inset-0 border-2 border-transparent rounded-full animate-[spin_3s_linear_infinite] [background:conic-gradient(rgba(255,255,255,0.3)_0%,rgba(255,255,255,0)_30%,rgba(255,255,255,0)_70%,rgba(255,255,255,0.3)_100%)]"></span>
-                  </span>
-
-                  {/* Button content */}
-                  <span className="relative flex items-center justify-center text-white group-hover:text-indigo-100 transition-colors duration-300">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6 mr-2 group-hover:animate-pulse"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 10V3L4 14h7v7l9-11h-7z"
-                      />
-                    </svg>
-                    Connect Wallet
-                  </span>
-
-                  {/* Hover effect */}
-                  <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></span>
-                </button>
+                  Start Your Journey
+                </Link>
               </div>
             </div>
             <div
