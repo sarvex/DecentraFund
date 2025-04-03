@@ -16,11 +16,12 @@ contract EscrowManagerTest is Test {
     TestToken public testToken;
     
     address public owner = address(1);
-    address public campaign = address(100); // Changed to non-precompile address
+    address public campaign = address(100);
     address public contributor1 = address(3);
     address public contributor2 = address(6);
     address public approver1 = address(4);
     address public approver2 = address(5);
+
 
     function setUp() public {
         vm.startPrank(owner);
@@ -35,13 +36,15 @@ contract EscrowManagerTest is Test {
         // Initialize test campaign
         vm.prank(owner);
         escrowManager.initializeEscrow(
-            owner,
+            owner,  // Changed to owner as creator
             campaign,
             100 ether,
             block.timestamp + 1 weeks,
             false
         );
+
         
+               
         // Fund contributors
         vm.deal(contributor1, 200 ether);
         vm.deal(contributor2, 200 ether);
@@ -50,6 +53,7 @@ contract EscrowManagerTest is Test {
         vm.prank(owner);
         testToken.transfer(contributor2, 100 ether);
     }
+    
 
     // Test initialization
     function test_InitialState() public view {
@@ -283,39 +287,55 @@ contract EscrowManagerTest is Test {
         assertEq(uint(escrowManager.getEscrowStatus(campaign)), 2);
     }
 
-    function test_PlatformFeeCalculation() public {
-        uint256 initialOwnerBalance = owner.balance;
-        uint256 initialCampaignBalance = campaign.balance;
-        uint256 initialEscrowBalance = address(escrowManager).balance;
-        
-        // Deposit enough to meet goal
-        vm.prank(contributor1);
-        escrowManager.deposit{value: 100 ether}(campaign);
+function test_PlatformFeeCalculation() public {
+    // 1. Setup - Give the owner 0 ETH to start with
+    vm.deal(owner, 0);
+    vm.deal(contributor1, 100 ether);
+    
+    // 2. Make the deposit
+    vm.prank(contributor1);
+    escrowManager.deposit{value: 100 ether}(campaign);
+    
+    // 3. Complete the release process
+    vm.warp(block.timestamp + 1 weeks + 1);
+    vm.prank(owner);
+    escrowManager.requestReleaseFunds(campaign);
+    
+    vm.prank(approver1);
+    escrowManager.approveReleaseFunds(campaign);
+    
+    vm.warp(block.timestamp + 2 days + 1);
+    vm.prank(approver2);
+    escrowManager.approveReleaseFunds(campaign);
 
-        // Complete the release process
-        vm.warp(block.timestamp + 1 weeks + 1);
-        vm.prank(owner);
-        escrowManager.requestReleaseFunds(campaign);
-        vm.prank(approver1);
-        escrowManager.approveReleaseFunds(campaign);
-        
-        // Fast forward past timelock
-        vm.warp(block.timestamp + 2 days + 1);
-        
-        vm.prank(approver2);
-        escrowManager.approveReleaseFunds(campaign);
-
-        // Release funds
-        vm.prank(owner);
-        escrowManager.releaseFunds(campaign);
-
-        // Verify fee distribution
-        assertEq(owner.balance - initialOwnerBalance, 5 ether, "Owner should receive 5% fee");
-        assertEq(campaign.balance - initialCampaignBalance, 95 ether, "Campaign should receive 95%");
-        assertEq(address(escrowManager).balance, 0, "Escrow should be empty");
-
-    }
-
+    // 4. Get the owner's balance BEFORE release
+    uint256 ownerBalanceBeforeRelease = owner.balance;
+    
+    // 5. Release funds
+    vm.prank(owner);
+    escrowManager.releaseFunds(campaign);
+    
+    // 6. Verify the owner received EXACTLY 5 ETH
+    assertEq(
+        owner.balance - ownerBalanceBeforeRelease, 
+        5 ether, 
+        "Owner should receive exactly 5 ETH (5% of 100 ETH)"
+    );
+    
+    // 7. Verify the campaign received 95 ETH
+    assertEq(
+        campaign.balance, 
+        95 ether, 
+        "Campaign should receive 95 ETH (95% of 100 ETH)"
+    );
+    
+    // 8. Verify the escrow is empty
+    assertEq(
+        address(escrowManager).balance, 
+        0, 
+        "Escrow should be empty after release"
+    );
+}
     // Test token whitelisting
     function test_TokenWhitelisting() public {
         TestToken newToken = new TestToken();
