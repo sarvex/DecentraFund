@@ -176,10 +176,10 @@ contract EscrowManager is ReentrancyGuard {
         uint256 creatorAmount = escrow.totalDeposited - platformFee;
         
         // Transfer funds with proper fee distribution
-        (bool success1, ) = payable(escrow.creator).call{value: creatorAmount}("");
-        require(success1, "Creator transfer failed");
-        (bool success2, ) = payable(owner).call{value: platformFee}("");
-        require(success2, "Platform fee transfer failed");
+        (bool success1, ) = payable(owner).call{value: platformFee}("");
+        require(success1, "Platform fee transfer failed");
+        (bool success2, ) = payable(escrow.creator).call{value: creatorAmount}("");
+        require(success2, "Creator transfer failed");
         
         emit FundsReleased(_campaign, creatorAmount, platformFee);
         

@@ -15,13 +15,12 @@ contract EscrowManagerTest is Test {
     EscrowManager public escrowManager;
     TestToken public testToken;
     
-    address public owner = address(1);
-    address public campaign = address(100);
-    address public contributor1 = address(3);
-    address public contributor2 = address(6);
-    address public approver1 = address(4);
-    address public approver2 = address(5);
-
+    address public owner = address(0x1001);
+    address public campaign = address(0x1002);
+    address public contributor1 = address(0x1003);
+    address public contributor2 = address(0x1004);
+    address public approver1 = address(0x1005);
+    address public approver2 = address(0x1006);
 
     function setUp() public {
         vm.startPrank(owner);
@@ -34,7 +33,7 @@ contract EscrowManagerTest is Test {
         vm.stopPrank();
         
         // Initialize test campaign
-        vm.prank(owner);
+        vm.startPrank(owner);
         escrowManager.initializeEscrow(
             owner,  // Changed to owner as creator
             campaign,
@@ -48,10 +47,9 @@ contract EscrowManagerTest is Test {
         // Fund contributors
         vm.deal(contributor1, 200 ether);
         vm.deal(contributor2, 200 ether);
-        vm.prank(owner);
         testToken.transfer(contributor1, 100 ether);
-        vm.prank(owner);
         testToken.transfer(contributor2, 100 ether);
+        vm.stopPrank();
     }
     
 
@@ -288,8 +286,11 @@ contract EscrowManagerTest is Test {
     }
 
 function test_PlatformFeeCalculation() public {
-    // 1. Setup - Give the owner 0 ETH to start with
-    vm.deal(owner, 0);
+    // 1. Setup - Reset balances completely
+    vm.prank(owner);
+    payable(address(0)).transfer(owner.balance);
+    vm.prank(campaign);
+    payable(address(0)).transfer(campaign.balance);
     vm.deal(contributor1, 100 ether);
     
     // 2. Make the deposit
@@ -308,8 +309,9 @@ function test_PlatformFeeCalculation() public {
     vm.prank(approver2);
     escrowManager.approveReleaseFunds(campaign);
 
-    // 4. Get the owner's balance BEFORE release
+    // 4. Get balances BEFORE release
     uint256 ownerBalanceBeforeRelease = owner.balance;
+    uint256 campaignBalanceBeforeRelease = campaign.balance;
     
     // 5. Release funds
     vm.prank(owner);
@@ -324,7 +326,7 @@ function test_PlatformFeeCalculation() public {
     
     // 7. Verify the campaign received 95 ETH
     assertEq(
-        campaign.balance, 
+        campaign.balance - campaignBalanceBeforeRelease, 
         95 ether, 
         "Campaign should receive 95 ETH (95% of 100 ETH)"
     );
@@ -334,6 +336,14 @@ function test_PlatformFeeCalculation() public {
         address(escrowManager).balance, 
         0, 
         "Escrow should be empty after release"
+    );
+    
+    // 9. Verify total funds moved equals 100 ETH
+    assertEq(
+        (owner.balance - ownerBalanceBeforeRelease) + 
+        (campaign.balance - campaignBalanceBeforeRelease),
+        100 ether,
+        "Total funds moved should equal 100 ETH"
     );
 }
     // Test token whitelisting
