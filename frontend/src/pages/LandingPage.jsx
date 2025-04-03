@@ -1,7 +1,19 @@
 import { Link } from "react-router-dom";
 import CampaignCard from "../components/campaign/CampaignCard";
+import { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 export default function LandingPage() {
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      easing: "ease-in-out",
+      once: false,
+      mirror: false,
+    });
+  }, []);
+
   const featuredCampaigns = [
     {
       id: 1,
@@ -11,8 +23,8 @@ export default function LandingPage() {
       progress: 65,
       target: 5000,
       daysLeft: 12,
-      image: "/placeholder-campaign1.jpg",
-      category: "Sustainability",
+      image: "/src/assets/waterbottle.jpg",
+      category: "Environment",
     },
     {
       id: 2,
@@ -22,7 +34,7 @@ export default function LandingPage() {
       progress: 40,
       target: 10000,
       daysLeft: 25,
-      image: "/placeholder-campaign2.jpg",
+      image: "/src/assets/commgarden.jpg",
       category: "Community",
     },
     {
@@ -33,7 +45,7 @@ export default function LandingPage() {
       progress: 85,
       target: 15000,
       daysLeft: 5,
-      image: "/placeholder-campaign3.jpg",
+      image: "/src/assets/ai.jpg",
       category: "Technology",
     },
   ];
@@ -49,42 +61,90 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-indigo-900 to-purple-800 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/hero-pattern.svg')] bg-center opacity-10"></div>
+        <div className="absolute inset-0 bg-[url('/hero-pattern.svg')] bg-center opacity-10" />
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-24 sm:py-32">
           <div className="flex flex-col lg:flex-row items-center gap-16">
-            <div className="lg:w-1/2 space-y-8">
+            <div
+              className="lg:w-1/2 space-y-8"
+              data-aos="fade-right"
+              data-aos-delay="100"
+            >
               <h1 className="text-5xl md:text-6xl font-bold leading-tight">
                 Bring <span className="text-teal-300">Creative</span> Projects
                 to Life
               </h1>
-              <p className="text-xl text-indigo-100 max-w-2xl">
+              <p
+                className="text-xl text-indigo-100 max-w-2xl"
+                data-aos="fade-right"
+                data-aos-delay="200"
+              >
                 The world's most trusted crowdfunding platform for innovators,
                 creators, and changemakers.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div
+                className="flex flex-col sm:flex-row gap-4"
+                data-aos="fade-right"
+                data-aos-delay="300"
+              >
                 <Link
                   to="/campaigns"
                   className="bg-teal-500 hover:bg-teal-400 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-teal-500/30 text-center"
                 >
                   Explore Projects
                 </Link>
-                <Link
-                  to="/dashboard"
-                  className="border-2 border-white text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover:bg-white/10 text-center"
+                <button
+                  onClick={() => console.log("Connect wallet clicked")}
+                  className="relative overflow-hidden px-8 py-4 rounded-full font-semibold text-lg group"
                 >
-                  Start Your Journey
-                </Link>
+                  {/* Animated border */}
+                  <span className="absolute inset-0 border-2 border-white rounded-full overflow-hidden">
+                    <span className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-all duration-500"></span>
+                    <span className="absolute inset-0 border-2 border-transparent rounded-full animate-[spin_3s_linear_infinite] [background:conic-gradient(rgba(255,255,255,0.3)_0%,rgba(255,255,255,0)_30%,rgba(255,255,255,0)_70%,rgba(255,255,255,0.3)_100%)]"></span>
+                  </span>
+
+                  {/* Button content */}
+                  <span className="relative flex items-center justify-center text-white group-hover:text-indigo-100 transition-colors duration-300">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 mr-2 group-hover:animate-pulse"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                      />
+                    </svg>
+                    Connect Wallet
+                  </span>
+
+                  {/* Hover effect */}
+                  <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></span>
+                </button>
               </div>
             </div>
-            <div className="lg:w-1/2 relative">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+            <div
+              className="lg:w-1/2 relative"
+              data-aos="fade-left"
+              data-aos-delay="400"
+            >
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl transform hover:scale-[1.02] transition-transform duration-500">
                 <img
-                  src="/hero-image.png"
+                  src="/src/assets/landingimage.jpg"
                   alt="People collaborating on creative projects"
                   className="w-full h-auto object-cover"
+                  data-aos="zoom-in"
+                  data-aos-delay="500"
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-                  <div className="flex items-center">
+                  <div
+                    className="flex items-center"
+                    data-aos="fade-up"
+                    data-aos-delay="600"
+                  >
                     <div className="bg-teal-400 rounded-full p-2 mr-3">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -120,7 +180,9 @@ export default function LandingPage() {
             {stats.map((stat, index) => (
               <div
                 key={index}
-                className="p-6 rounded-xl bg-gradient-to-br from-white to-gray-50 shadow-sm hover:shadow-md transition-shadow"
+                className="p-6 rounded-xl bg-gradient-to-br from-white to-gray-50 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1"
+                data-aos="fade-up"
+                data-aos-delay={index * 100}
               >
                 <p className="text-4xl font-bold text-indigo-900">
                   {stat.value}
@@ -135,7 +197,11 @@ export default function LandingPage() {
       {/* Featured Campaigns */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div
+            className="text-center mb-16"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
               Featured Campaigns
             </h2>
@@ -145,15 +211,25 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredCampaigns.map((campaign) => (
-              <CampaignCard key={campaign.id} campaign={campaign} />
+            {featuredCampaigns.map((campaign, index) => (
+              <div
+                key={campaign.id}
+                data-aos="fade-up"
+                data-aos-delay={150 + index * 100}
+              >
+                <CampaignCard campaign={campaign} />
+              </div>
             ))}
           </div>
 
-          <div className="text-center mt-12">
+          <div
+            className="text-center mt-12"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
             <Link
               to="/campaigns"
-              className="inline-flex items-center px-8 py-3 border border-transparent text-lg font-medium rounded-full text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-sm"
+              className="inline-flex items-center px-8 py-3 border border-transparent text-lg font-medium rounded-full text-white bg-indigo-600 hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-indigo-500/30"
             >
               View All Campaigns
               <svg
@@ -175,7 +251,11 @@ export default function LandingPage() {
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-indigo-700 to-purple-700 text-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+        <div
+          className="max-w-7xl mx-auto px-6 lg:px-8 text-center"
+          data-aos="zoom-in"
+          data-aos-delay="100"
+        >
           <h2 className="text-4xl font-bold mb-6">
             Ready to bring your idea to life?
           </h2>
@@ -185,7 +265,9 @@ export default function LandingPage() {
           </p>
           <Link
             to="/dashboard"
-            className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-full text-indigo-700 bg-white hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl"
+            className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-full text-indigo-700 bg-white hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+            data-aos="zoom-in"
+            data-aos-delay="200"
           >
             Start Your Campaign Today
             <svg

@@ -1,10 +1,10 @@
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-300">
+    <footer className="bg-gray-900 text-gray-300" data-aos="fade-up">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand Info */}
-          <div className="space-y-4">
+          <div className="space-y-4" data-aos="fade-right" data-aos-delay="100">
             <div className="flex items-center">
               <span className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
                 CrowdFund
@@ -65,7 +65,7 @@ export default function Footer() {
           </div>
 
           {/* Navigation */}
-          <div className="space-y-4">
+          <div className="space-y-4" data-aos="fade-right" data-aos-delay="200">
             <h3 className="text-sm font-semibold leading-6 text-white">
               Navigation
             </h3>
@@ -106,7 +106,7 @@ export default function Footer() {
           </div>
 
           {/* Resources */}
-          <div className="space-y-4">
+          <div className="space-y-4" data-aos="fade-right" data-aos-delay="300">
             <h3 className="text-sm font-semibold leading-6 text-white">
               Resources
             </h3>
@@ -147,7 +147,7 @@ export default function Footer() {
           </div>
 
           {/* Legal */}
-          <div className="space-y-4">
+          <div className="space-y-4" data-aos="fade-right" data-aos-delay="400">
             <h3 className="text-sm font-semibold leading-6 text-white">
               Legal
             </h3>
@@ -189,7 +189,11 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="mt-16 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
+        <div
+          className="mt-16 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center"
+          data-aos="fade-in"
+          data-aos-delay="500"
+        >
           <p className="text-xs text-gray-500">
             &copy; {new Date().getFullYear()} CrowdFund DApp. All rights
             reserved.
