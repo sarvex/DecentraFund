@@ -2,113 +2,127 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import "../src/CrowdfundingFactory.sol";
+import "../contracts/CrowdfundingFactory.sol";
 
 contract CrowdfundingFactoryTest is Test {
     CrowdfundingFactory factory;
-    address owner = address(1);
-    address user1 = address(2);
-    address user2 = address(3);
+    address owner = address(0x1000);
+    address user1 = address(0x2000);
+    address user2 = address(0x3000);
+    uint256 initialFee = 5; // 5%
 
     function setUp() public {
         vm.prank(owner);
-        factory = new CrowdfundingFactory(5); // 5% platform fee
+        factory = new CrowdfundingFactory(initialFee);
     }
 
-    function testDeployment() public view {
+    function testInitialState() public view {
         assertEq(factory.owner(), owner);
-        assertEq(factory.platformFeePercentage(), 5);
+        assertEq(factory.platformFeePercentage(), initialFee);
+        assertEq(factory.getTotalCampaigns(), 0);
     }
 
-    function testCampaignCreation() public {
+    function testCreateCampaign() public {
         vm.prank(user1);
         address campaign = factory.createCampaign(
             10 ether,
-            block.timestamp + 1 days,
+            block.timestamp + 30 days,
             "Test Campaign",
             "Test Description",
-            "https://test.com/image.jpg",
+            "test.png",
             false
         );
 
-        address[] memory campaigns = factory.getUserCampaigns(user1);
-        assertEq(campaigns.length, 1);
         assertTrue(campaign != address(0));
+        assertEq(factory.getTotalCampaigns(), 1);
+        assertEq(factory.getUserCampaigns(user1).length, 1);
+        assertEq(factory.getUserCampaigns(user1)[0], campaign);
     }
 
-    function testCampaignCreationWithZeroGoal() public {
+    function test_RevertWhen_CreateCampaign_InvalidGoal() public {
         vm.prank(user1);
         vm.expectRevert("Goal must be > 0");
         factory.createCampaign(
             0,
-            block.timestamp + 1 days,
-            "Invalid Campaign",
-            "Description",
-            "https://test.com/image.jpg",
+            block.timestamp + 30 days,
+            "Test Campaign",
+            "Test Description",
+            "test.png",
             false
         );
     }
 
-    function testCampaignCreationWithPastDeadline() public {
+    function test_RevertWhen_CreateCampaign_PastDeadline() public {
         vm.prank(user1);
-        vm.expectRevert("Deadline must be in the future");
+        vm.expectRevert("Deadline must be in future");
         factory.createCampaign(
             10 ether,
             block.timestamp - 1,
-            "Invalid Campaign",
-            "Description",
-            "https://test.com/image.jpg",
+            "Test Campaign",
+            "Test Description",
+            "test.png",
             false
         );
     }
 
-    function testFeeChange() public {
+    function testChangePlatformFee() public {
+        uint256 newFee = 7;
         vm.prank(owner);
-        factory.setPlatformFee(3);
-        assertEq(factory.platformFeePercentage(), 3);
+        factory.setPlatformFee(newFee);
+
+        assertEq(factory.platformFeePercentage(), newFee);
     }
 
-    function testFeeChangeFromNonOwner() public {
+    function test_RevertWhen_ChangePlatformFee_NotOwner() public {
         vm.prank(user1);
-        vm.expectRevert("Only owner can change fee");
-        factory.setPlatformFee(3);
+        vm.expectRevert();
+        factory.setPlatformFee(7);
     }
 
-    function testFeeChangeInvalidValue() public {
+    function test_RevertWhen_ChangePlatformFee_TooHigh() public {
         vm.prank(owner);
         vm.expectRevert("Fee cannot exceed 10%");
         factory.setPlatformFee(11);
     }
 
-    function testGetAllCampaigns() public {
+    function testRecordSuccessfulCampaign() public {
+        // Create a campaign
         vm.prank(user1);
         address campaign = factory.createCampaign(
             10 ether,
-            block.timestamp + 1 days,
+            block.timestamp + 30 days,
             "Test Campaign",
             "Test Description",
-            "https://test.com/image.jpg",
+            "test.png",
             false
         );
-        
-        address[] memory campaigns = factory.getAllCampaigns();
-        assertEq(campaigns.length, 1);
-        assertEq(campaigns[0], campaign);
+
+        // Simulate campaign success
+        vm.prank(campaign);
+        factory.recordSuccessfulCampaign(10 ether, 5);
+
+        (, uint256 totalRaised, uint256 totalSuccessful, uint256 totalContributors) = factory.stats();
+        assertEq(totalRaised, 10 ether);
+        assertEq(totalSuccessful, 1);
+        assertEq(totalContributors, 5);
     }
 
-    function testGetUserCampaigns() public {
+    function testWithdrawFees() public {
+        // Simulate fees being collected
+        vm.deal(address(factory), 1 ether);
+
+        uint256 ownerBalanceBefore = owner.balance;
+        vm.prank(owner);
+        factory.withdrawFees();
+
+        assertEq(owner.balance - ownerBalanceBefore, 1 ether);
+        assertEq(address(factory).balance, 0);
+    }
+
+    function test_RevertWhen_WithdrawFees_NotOwner() public {
+        vm.deal(address(factory), 1 ether);
         vm.prank(user1);
-        address campaign = factory.createCampaign(
-            10 ether,
-            block.timestamp + 1 days,
-            "Test Campaign",
-            "Test Description",
-            "https://test.com/image.jpg",
-            false
-        );
-        
-        address[] memory campaigns = factory.getUserCampaigns(user1);
-        assertEq(campaigns.length, 1);
-        assertEq(campaigns[0], campaign);
+        vm.expectRevert();
+        factory.withdrawFees();
     }
 }

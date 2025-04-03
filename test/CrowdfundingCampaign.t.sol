@@ -2,148 +2,183 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import "../src/CrowdfundingCampaign.sol";
-import "../src/CrowdfundingFactory.sol";
-import "./mocks/MockERC20.sol";
+import "../contracts/CrowdfundingCampaign.sol";
+import "../test/mocks/MockERC20.sol";
 
 contract CrowdfundingCampaignTest is Test {
     CrowdfundingCampaign campaign;
-    CrowdfundingFactory factory;
     MockERC20 token;
-    address owner = address(1);
+    address creator = address(0x1000); // Changed from precompile address to regular address
     address contributor1 = address(2);
     address contributor2 = address(3);
+    uint256 goal = 10 ether;
+    uint256 deadline;
+    uint256 platformFee = 5; // 5%
+    bool isFlexible = false;
+    string title = "Test Campaign";
+    string desc = "Test Description";
+    string image = "test.png";
 
     function setUp() public {
-        vm.startPrank(owner);
-        factory = new CrowdfundingFactory(5); // 5% platform fee
+        deadline = block.timestamp + 30 days;
         token = new MockERC20();
-        
-        factory.createCampaign(
-            10 ether, // 10 ETH goal
-            block.timestamp + 1 days, // 1 day deadline
-            "Test Campaign",
-            "Test Description",
-            "https://test.com/image.jpg",
-            false // not flexible funding
+        campaign = new CrowdfundingCampaign(
+            creator,
+            goal,
+            deadline,
+            platformFee,
+            isFlexible,
+            title,
+            desc,
+            image
         );
-        
-        address campaignAddress = factory.getUserCampaigns(owner)[0];
-        campaign = CrowdfundingCampaign(payable(campaignAddress));
-        vm.stopPrank();
 
-        // Fund test contributors
+        // Fund test accounts
         vm.deal(contributor1, 20 ether);
         vm.deal(contributor2, 20 ether);
-        // Mint tokens directly to contributors to avoid insufficient balance
-        token.mint(contributor1, 100 ether);
-        token.mint(contributor2, 100 ether);
+        token.mint(contributor1, 1000 ether);
+        token.mint(contributor2, 1000 ether);
     }
 
-    function testDeployment() public view {
-        assertEq(campaign.creator(), owner);
-        assertEq(campaign.goal(), 10 ether);
+    function testInitialState() public view {
+        assertEq(campaign.creator(), creator);
+        assertEq(campaign.goal(), goal);
+        assertEq(campaign.deadline(), deadline);
+        assertEq(campaign.platformFeePercentage(), platformFee);
+        assertEq(campaign.isFlexibleFunding(), isFlexible);
+        assertEq(campaign.title(), title);
+        assertEq(campaign.description(), desc);
+        assertEq(campaign.imageURL(), image);
+        assertEq(campaign.getStatus(), "Active");
     }
 
-    function testEthContributions() public {
-        vm.deal(contributor1, 1 ether);
+    function testEthContribution() public {
+        uint256 tierIndex = 0;
+        uint256 minAmount = 1 ether;
+        string memory reward = "Basic Tier";
+        
+        // Create tier
+        vm.prank(creator);
+        campaign.createTier(minAmount, reward, 100);
+
+        // Contribute ETH
         vm.prank(contributor1);
-        (bool success,) = address(campaign).call{value: 1 ether}("");
-        assertTrue(success);
-        assertEq(address(campaign).balance, 1 ether);
+        campaign.contribute{value: 1 ether}(tierIndex);
+
+        assertEq(campaign.contributions(contributor1), 1 ether);
+        assertEq(campaign.totalRaised(), 1 ether);
+        assertEq(campaign.getContributorCount(), 1);
+        assertEq(campaign.backerTier(contributor1), tierIndex);
     }
 
-    function testVoting() public {
-        // First contribute
-        vm.deal(contributor1, 1 ether);
+    function testERC20Contribution() public {
+        uint256 tierIndex = 0;
+        uint256 minAmount = 1 ether;
+        string memory reward = "Basic Tier";
+        
+        // Create tier
+        vm.prank(creator);
+        campaign.createTier(minAmount, reward, 100);
+
+        // Approve and contribute ERC20
         vm.prank(contributor1);
-        (bool success,) = address(campaign).call{value: 1 ether}("");
-        assertTrue(success);
+        token.approve(address(campaign), 1 ether);
+
+        vm.prank(contributor1);
+        campaign.contributeERC20(address(token), 1 ether, tierIndex);
+
+        assertEq(campaign.erc20Contributions(address(token), contributor1), 1 ether);
+        assertEq(campaign.erc20TotalContributions(address(token)), 1 ether);
+        assertEq(campaign.backerTier(contributor1), tierIndex);
+    }
+
+    function testSuccessfulCampaignWithdrawal() public {
+        // Setup campaign with 2 contributors
+        vm.prank(creator);
+        campaign.createTier(1 ether, "Tier", 100);
+
+        vm.prank(contributor1);
+        campaign.contribute{value: 6 ether}(0);
+
+        vm.prank(contributor2);
+        campaign.contribute{value: 5 ether}(0);
 
         // Fast forward past deadline
-        vm.warp(block.timestamp + 2 days);
+        vm.warp(deadline + 1);
+        assertEq(campaign.getStatus(), "Successful");
 
-        // Test voting
+        // Vote for release
         vm.prank(contributor1);
-        campaign.voteForRelease();
-        assertTrue(campaign.votes(contributor1));
-    }
+        campaign.vote(false, true);
 
-    function testFlexibleFundingSuccess() public {
-        // Create flexible funding campaign
-        vm.startPrank(owner);
-        factory.createCampaign(
-            10 ether,
-            block.timestamp + 1 days,
-            "Flexible Campaign",
-            "Test",
-            "https://test.com/image.jpg",
-            true // flexible funding
-        );
-        address flexCampaignAddr = factory.getUserCampaigns(owner)[1];
-        CrowdfundingCampaign flexCampaign = CrowdfundingCampaign(payable(flexCampaignAddr));
-        vm.stopPrank();
+        vm.prank(contributor2);
+        campaign.vote(false, true);
 
-        // Contribute but don't meet goal
-        vm.prank(contributor1);
-        (bool success,) = address(flexCampaign).call{value: 5 ether}("");
-        assertTrue(success);
+        // Request and execute withdrawal
+        vm.prank(creator);
+        campaign.requestWithdrawal();
 
-        // Fast forward and vote
-        vm.warp(block.timestamp + 2 days);
-        vm.prank(contributor1);
-        flexCampaign.voteForRelease();
-
-        // Should be able to withdraw despite not meeting goal
-        vm.prank(owner);
-        flexCampaign.withdrawFunds();
-    }
-
-
-    function testMultipleContributions() public {
-        // First contribution
-        vm.prank(contributor1);
-        (bool success,) = address(campaign).call{value: 1 ether}("");
-        assertTrue(success);
-
-        // Second contribution
-        vm.prank(contributor1);
-        (bool success2,) = address(campaign).call{value: 2 ether}("");
-        assertTrue(success2);
-
-        assertEq(campaign.contributions(contributor1), 3 ether);
-    }
-
-    function test_RevertWhen_NotEnoughVotes() public {
-        // Contribute but don't vote
-        vm.prank(contributor1);
-        (bool success,) = address(campaign).call{value: 1 ether}("");
-        assertTrue(success);
-
-        vm.warp(block.timestamp + 2 days);
-
-        // Should fail to withdraw without votes
-        vm.prank(owner);
-        vm.expectRevert("Not enough votes");
+        vm.warp(block.timestamp + 2 days + 1);
+        
+        uint256 creatorBalanceBefore = creator.balance;
+        vm.prank(creator);
         campaign.withdrawFunds();
+
+        uint256 expectedFee = (11 ether * platformFee) / 100;
+        uint256 expectedCreatorAmount = 11 ether - expectedFee;
+        assertEq(creator.balance - creatorBalanceBefore, expectedCreatorAmount);
+        assertTrue(campaign.fundsWithdrawn());
     }
 
-    event Contributed(address indexed contributor, uint256 amount);
-    event VotedForRelease(address indexed voter);
+    function test_RevertWhen_CampaignFails_ThenRefund() public {
+        vm.prank(creator);
+        campaign.createTier(1 ether, "Tier", 100);
 
-    function testEventEmissions() public {
-        // Test Contributed event
-        vm.expectEmit(true, true, false, true);
-        emit Contributed(contributor1, 1 ether);
         vm.prank(contributor1);
-        (bool success,) = address(campaign).call{value: 1 ether}("");
-        assertTrue(success);
+        campaign.contribute{value: 4 ether}(0);
 
-        // Test VotedForRelease event
-        vm.warp(block.timestamp + 2 days);
-        vm.expectEmit(true, false, false, false);
-        emit VotedForRelease(contributor1);
+        // Fast forward past deadline
+        vm.warp(deadline + 1);
+        assertEq(campaign.getStatus(), "Failed");
+
+        // Claim refund
+        uint256 balanceBefore = contributor1.balance;
         vm.prank(contributor1);
-        campaign.voteForRelease();
+        campaign.claimRefund();
+
+        assertEq(contributor1.balance - balanceBefore, 4 ether);
+        assertEq(campaign.contributions(contributor1), 0);
     }
+
+    function testCampaignExtension() public {
+        vm.prank(creator);
+        campaign.createTier(1 ether, "Tier", 100);
+
+        vm.prank(contributor1);
+        campaign.contribute{value: 1 ether}(0);
+
+        vm.prank(contributor2);
+        campaign.contribute{value: 1 ether}(0);
+
+        // Vote for extension
+        vm.prank(contributor1);
+        campaign.vote(true, false);
+
+        vm.prank(contributor2);
+        campaign.vote(true, false);
+
+        // Request and execute extension
+        uint256 newDeadline = deadline + 30 days;
+        vm.prank(creator);
+        campaign.requestExtension(newDeadline);
+
+        vm.warp(block.timestamp + 2 days + 1);
+        vm.prank(creator);
+        campaign.extendDeadline(newDeadline);
+
+        assertEq(campaign.deadline(), newDeadline);
+        assertEq(campaign.votesForExtension(), 0);
+    }
+
+    // Additional edge case tests would go here...
 }

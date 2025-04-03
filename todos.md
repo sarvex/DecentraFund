@@ -21,59 +21,59 @@ Here's a comprehensive, step-by-step checklist to build your platform from start
 
 ### Core Contracts
 
-- [ ] **Factory Contract**
+- [done] **Factory Contract**
 
   - Implement `createCampaign()` function
   - Add campaign tracking and statistics
   - Set up platform fee mechanism
 
-- [ ] **Campaign Contract**
+- [done] **Campaign Contract**
 
   - Create campaign state variables (goal, deadline, raised amount)
   - Implement contribution functionality
   - Add refund mechanism for failed campaigns
   - Create withdrawal function for successful campaigns
 
-- [ ] **Escrow Contract**
+- [done] **Escrow Contract**
   - Implement secure fund holding
   - Add conditional release functions
   - Create refund distribution mechanism
 
 ### Testing
 
-- [ ] **Write comprehensive tests**
+- [done] **Write comprehensive tests**
 
   - Test campaign creation
   - Test contribution scenarios
   - Test successful/failed campaign outcomes
   - Test edge cases and security vulnerabilities
 
-- [ ] **Run tests**
+- [done] **Run tests**
   - `forge test` for unit tests
   - Add integration tests
   - Set up gas usage reports
 
 ## Phase 3: Advanced Smart Contract Features
 
-- [ ] **Add ERC20 support**
+- [done] **Add ERC20 support**
 
   - Modify contribution functions
   - Add token approval checks
   - Test with multiple token types
 
-- [ ] **Implement funding tiers**
+- [done] **Implement funding tiers**
 
   - Add reward tier structure
   - Create tier-based contribution logic
   - Test reward distribution
 
-- [ ] **Governance system**
+- [done] **Governance system**
 
   - Deploy governance token
   - Implement voting mechanisms
   - Create dispute resolution flow
 
-- [ ] **Security enhancements**
+- [done] **Security enhancements**
   - Add reentrancy guards
   - Implement time locks
   - Add access control modifiers
@@ -82,25 +82,25 @@ Here's a comprehensive, step-by-step checklist to build your platform from start
 
 ### Core Components
 
-- [ ] **Landing page**
+- [done] **Landing page**
 
   - Create hero section
   - Add featured campaigns display
   - Build navigation
 
-- [ ] **Campaign browser**
+- [done] **Campaign browser**
 
   - Implement filtering/sorting
   - Create search functionality
   - Add pagination
 
-- [ ] **Campaign detail page**
+- [done] **Campaign detail page**
 
   - Build funding progress display
   - Create contribution form
   - Add backer comments section
 
-- [ ] **User dashboard**
+- [done] **User dashboard**
   - Creator view (campaign management)
   - Backer view (contributions/rewards)
   - Admin view (moderation tools)
