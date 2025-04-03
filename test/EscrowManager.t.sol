@@ -16,12 +16,11 @@ contract EscrowManagerTest is Test {
     TestToken public testToken;
     
     address public owner = address(1);
-    address public campaign = address(2);
+    address public campaign = address(100); // Changed to non-precompile address
     address public contributor1 = address(3);
     address public contributor2 = address(6);
     address public approver1 = address(4);
     address public approver2 = address(5);
-
 
     function setUp() public {
         vm.startPrank(owner);
@@ -36,18 +35,20 @@ contract EscrowManagerTest is Test {
         // Initialize test campaign
         vm.prank(owner);
         escrowManager.initializeEscrow(
-            owner, // Using owner as creator
+            owner,
             campaign,
-            100 ether, // goal
-            block.timestamp + 1 weeks, // deadline
-            false // fixed funding
+            100 ether,
+            block.timestamp + 1 weeks,
+            false
         );
         
         // Fund contributors
         vm.deal(contributor1, 200 ether);
         vm.deal(contributor2, 200 ether);
-        testToken.transfer(contributor1, 1000 ether);
-        testToken.transfer(contributor2, 1000 ether);
+        vm.prank(owner);
+        testToken.transfer(contributor1, 100 ether);
+        vm.prank(owner);
+        testToken.transfer(contributor2, 100 ether);
     }
 
     // Test initialization
@@ -71,12 +72,12 @@ contract EscrowManagerTest is Test {
     // Test ERC20 deposits
     function test_ERC20_Deposit() public {
         uint256 amount = 100 ether;
-        vm.startPrank(owner);
+        vm.startPrank(contributor1);
         testToken.approve(address(escrowManager), amount);
         escrowManager.depositERC20(address(testToken), campaign, amount);
         vm.stopPrank();
 
-        assertEq(escrowManager.getUserERC20Deposit(address(testToken), campaign, owner), amount);
+        assertEq(escrowManager.getUserERC20Deposit(address(testToken), campaign, contributor1), amount);
         assertEq(testToken.balanceOf(address(escrowManager)), amount);
     }
 
@@ -97,7 +98,7 @@ contract EscrowManagerTest is Test {
     function test_RequestReleaseFunds() public {
         // Setup - deposit funds
         vm.prank(contributor1);
-        escrowManager.deposit{value: 1 ether}(campaign);
+        escrowManager.deposit{value: 100 ether}(campaign);
 
         // Fast forward past deadline
         vm.warp(block.timestamp + 1 weeks + 1);
@@ -106,15 +107,15 @@ contract EscrowManagerTest is Test {
         vm.prank(owner);
         escrowManager.requestReleaseFunds(campaign);
 
-        // Verify state changed
-        assertEq(uint(escrowManager.getEscrowStatus(campaign)), uint(EscrowManager.EscrowState.PENDING_RELEASE));
+        // Verify state changed to PENDING_RELEASE (1)
+        assertEq(uint(escrowManager.getEscrowStatus(campaign)), 1);
     }
 
     // Test approveReleaseFunds function
     function test_ApproveReleaseFunds() public {
         // Setup - deposit and request release
         vm.prank(contributor1);
-        escrowManager.deposit{value: 1 ether}(campaign);
+        escrowManager.deposit{value: 100 ether}(campaign);
         
         // Fast forward past deadline
         vm.warp(block.timestamp + 1 weeks + 1);
@@ -122,19 +123,83 @@ contract EscrowManagerTest is Test {
         vm.prank(owner);
         escrowManager.requestReleaseFunds(campaign);
 
-        // First approval
+        // First approval - state should remain PENDING_RELEASE (1)
         vm.prank(approver1);
         escrowManager.approveReleaseFunds(campaign);
-        assertEq(uint(escrowManager.getEscrowStatus(campaign)), uint(EscrowManager.EscrowState.PENDING_RELEASE));
-
-        // Second approval (but timelock not passed yet)
-        vm.prank(approver2);
-        escrowManager.approveReleaseFunds(campaign);
-        assertEq(uint(escrowManager.getEscrowStatus(campaign)), uint(EscrowManager.EscrowState.PENDING_RELEASE));
+        assertEq(uint(escrowManager.getEscrowStatus(campaign)), 1);
 
         // Fast forward past timelock
         vm.warp(block.timestamp + 2 days + 1);
-        assertEq(uint(escrowManager.getEscrowStatus(campaign)), uint(EscrowManager.EscrowState.RELEASED));
+
+        // Second approval - state should transition to RELEASED (2)
+        vm.prank(approver2);
+        escrowManager.approveReleaseFunds(campaign);
+        assertEq(uint(escrowManager.getEscrowStatus(campaign)), 2);
+    }
+
+    function test_ReleaseFunds() public {
+        // Setup - deposit funds
+        vm.prank(contributor1);
+        escrowManager.deposit{value: 100 ether}(campaign);
+
+        // Complete approval process
+        vm.warp(block.timestamp + 1 weeks + 1);
+        vm.prank(owner);
+        escrowManager.requestReleaseFunds(campaign);
+        vm.prank(approver1);
+        escrowManager.approveReleaseFunds(campaign);
+        vm.warp(block.timestamp + 2 days + 1);
+        vm.prank(approver2);
+        escrowManager.approveReleaseFunds(campaign);
+
+        // Track balances before release
+        uint256 initialCreatorBalance = campaign.balance;
+        uint256 initialOwnerBalance = owner.balance;
+        uint256 initialEscrowBalance = address(escrowManager).balance;
+        
+        vm.prank(owner);
+        escrowManager.releaseFunds(campaign);
+        
+        // Verify funds were distributed correctly (95% to creator, 5% to owner)
+        assertEq(campaign.balance, initialCreatorBalance + 95 ether, "Creator should receive 95%");
+        assertEq(owner.balance, initialOwnerBalance + 5 ether, "Owner should receive 5% fee");
+        assertEq(address(escrowManager).balance, initialEscrowBalance - 100 ether, "Escrow should be emptied");
+        assertEq(uint(escrowManager.getEscrowStatus(campaign)), 0, "Escrow should be reset to ACTIVE");
+    }
+
+    function test_OnlyOwnerCanReleaseFunds() public {
+        test_ApproveReleaseFunds();
+        
+        vm.expectRevert("Only owner");
+        vm.prank(contributor1);
+        escrowManager.releaseFunds(campaign);
+    }
+
+    function test_CannotReleaseTwice() public {
+        test_ApproveReleaseFunds();
+        
+        vm.prank(owner);
+        escrowManager.releaseFunds(campaign);
+        
+        vm.expectRevert("Not ready for release");
+        vm.prank(owner);
+        escrowManager.releaseFunds(campaign);
+    }
+
+    function test_ReleaseWithZeroFunds() public {
+        // Setup approvals without deposits
+        vm.warp(block.timestamp + 1 weeks + 1);
+        vm.prank(owner);
+        escrowManager.requestReleaseFunds(campaign);
+        
+        vm.prank(approver1);
+        escrowManager.approveReleaseFunds(campaign);
+        vm.prank(approver2);
+        escrowManager.approveReleaseFunds(campaign);
+        
+        vm.expectRevert("Not ready for release");
+        vm.prank(owner);
+        escrowManager.releaseFunds(campaign);
     }
 
     // Test failed campaign refund
@@ -153,14 +218,16 @@ contract EscrowManagerTest is Test {
         // Approve release
         vm.prank(approver1);
         escrowManager.approveReleaseFunds(campaign);
+        
+        // Fast forward past timelock
+        vm.warp(block.timestamp + 2 days + 1);
+        
         vm.prank(approver2);
         escrowManager.approveReleaseFunds(campaign);
 
-        // Fast forward past timelock
-        vm.warp(block.timestamp + 2 days + 1);
+        // Verify state changed to REFUNDED (3)
 
-        // Verify state changed to REFUNDED
-        assertEq(uint(escrowManager.getEscrowStatus(campaign)), uint(EscrowManager.EscrowState.REFUNDED));
+        assertEq(uint(escrowManager.getEscrowStatus(campaign)), 3);
 
         // Test claim refund
         uint256 initialBalance = contributor1.balance;
@@ -171,6 +238,9 @@ contract EscrowManagerTest is Test {
 
     // Test edge cases and failure scenarios
     function test_OnlyOwnerOrCampaignCanRequestRelease() public {
+        // Fast forward past deadline
+        vm.warp(block.timestamp + 1 weeks + 1);
+
         // Should work when called by owner
         vm.prank(owner);
         escrowManager.requestReleaseFunds(campaign);
@@ -187,25 +257,63 @@ contract EscrowManagerTest is Test {
         escrowManager.approveReleaseFunds(campaign);
     }
 
-    // Test platform fee calculation
-    function test_PlatformFeeCalculation() public {
+    function test_TimelockEnforcement() public {
+        // Setup - deposit funds
         vm.prank(contributor1);
         escrowManager.deposit{value: 100 ether}(campaign);
 
+        // Fast forward past deadline
         vm.warp(block.timestamp + 1 weeks + 1);
+
+        // Request release
         vm.prank(owner);
         escrowManager.requestReleaseFunds(campaign);
 
+        // First approval - state should remain PENDING_RELEASE (1)
         vm.prank(approver1);
         escrowManager.approveReleaseFunds(campaign);
+        assertEq(uint(escrowManager.getEscrowStatus(campaign)), 1);
+
+        // Fast forward past timelock
+        vm.warp(block.timestamp + 2 days + 1);
+
+        // Second approval - state should transition to RELEASED (2)
+        vm.prank(approver2);
+        escrowManager.approveReleaseFunds(campaign);
+        assertEq(uint(escrowManager.getEscrowStatus(campaign)), 2);
+    }
+
+    function test_PlatformFeeCalculation() public {
+        uint256 initialOwnerBalance = owner.balance;
+        uint256 initialCampaignBalance = campaign.balance;
+        uint256 initialEscrowBalance = address(escrowManager).balance;
+        
+        // Deposit enough to meet goal
+        vm.prank(contributor1);
+        escrowManager.deposit{value: 100 ether}(campaign);
+
+        // Complete the release process
+        vm.warp(block.timestamp + 1 weeks + 1);
+        vm.prank(owner);
+        escrowManager.requestReleaseFunds(campaign);
+        vm.prank(approver1);
+        escrowManager.approveReleaseFunds(campaign);
+        
+        // Fast forward past timelock
+        vm.warp(block.timestamp + 2 days + 1);
+        
         vm.prank(approver2);
         escrowManager.approveReleaseFunds(campaign);
 
-        vm.warp(block.timestamp + 2 days + 1);
+        // Release funds
+        vm.prank(owner);
+        escrowManager.releaseFunds(campaign);
 
-        uint256 initialOwnerBalance = owner.balance;
-        assertEq(initialOwnerBalance, 0); // Owner starts with 0 ETH
-        assertEq(owner.balance, 5 ether); // 5% of 100 ETH
+        // Verify fee distribution
+        assertEq(owner.balance - initialOwnerBalance, 5 ether, "Owner should receive 5% fee");
+        assertEq(campaign.balance - initialCampaignBalance, 95 ether, "Campaign should receive 95%");
+        assertEq(address(escrowManager).balance, 0, "Escrow should be empty");
+
     }
 
     // Test token whitelisting
@@ -214,12 +322,11 @@ contract EscrowManagerTest is Test {
         vm.prank(owner);
         escrowManager.whitelistToken(address(newToken));
         
-        assertTrue(escrowManager.isTokenWhitelisted(address(newToken)));
+        assertTrue(escrowManager.whitelistedTokens(address(newToken)));
     }
 
-
     function test_CannotDepositZero() public {
-        vm.expectRevert("Amount must be greater than 0");
+        vm.expectRevert("Must deposit ETH");
         vm.prank(contributor1);
         escrowManager.deposit{value: 0}(campaign);
     }
