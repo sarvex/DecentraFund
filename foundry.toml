@@ -1,10 +1,19 @@
 [profile.default]
-src = "src"
-out = "out"
-libs = ["lib"]  
-solc_version = "0.8.20"  
+src = 'contracts'
+out = 'out'
+libs = ['lib']
+solc_version = "0.8.20"
+optimizer = true
+optimizer_runs = 200
 
-# Remappings
-remappings = [
-    "@openzeppelin/=node_modules/@openzeppelin/contracts/"
-]
+[fmt]
+line_length = 80
+tab_width = 2
+bracket_spacing = false
+int_types = "long"
+
+[rpc_endpoints]
+sepolia = "https://sepolia.infura.io/v3/06f0f542f49a4075a2a6b3885c84b1f5"
+
+[etherscan]
+sepolia = { key = "H4CH2E4ITYSM6C6UXBQSY81IR2SVWHJ92E" }

@@ -1,17 +1,34 @@
-# Compiler files
+# Environment variables
+.env
+.env.local
+.env*.local
+
+# Foundry directories
 cache/
 out/
+broadcast/
 
-# Ignores development broadcast logs
-!/broadcast
-/broadcast/*/31337/
-/broadcast/**/dry-run/
-
-# Docs
-docs/
-
-# Dotenv file
-.env
-
-# Node modules
+# Node.js
 node_modules/
+package-lock.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Debug files
+debug.log
+*.log
+
+# Build artifacts
+artifacts/
+coverage/
+coverage.json
+
+# Mac OS
+.DS_Store
+
+# Windows
+Thumbs.db

@@ -113,7 +113,7 @@ Here's a comprehensive, step-by-step checklist to build your platform from start
   - Add network detection
   - Handle chain switching
 
-- [ ] **Contract interaction**
+- [done] **Contract interaction**
 
   - Set up ethers.js
   - Create hooks for contract calls
@@ -128,7 +128,7 @@ Here's a comprehensive, step-by-step checklist to build your platform from start
 
 ### Smart Contracts
 
-- [ ] **Deploy to testnet**
+- [done] **Deploy to testnet**
 
   - Choose testnet (Sepolia, Goerli)
   - Write deployment scripts

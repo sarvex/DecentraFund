@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
-import { BrowserProvider } from "ethers";
+import { useContractContext } from "../../context/ContractContext";
 
 export default function ConnectWalletButton({
   variant = "default",
   className = "",
 }) {
+  const { account, chainId, provider } = useContractContext();
   const [isConnecting, setIsConnecting] = useState(false);
-  const [account, setAccount] = useState(null);
-  const [chainId, setChainId] = useState(null);
   const [showNetworkMenu, setShowNetworkMenu] = useState(false);
 
   // Common networks for DApps
@@ -23,39 +22,25 @@ export default function ConnectWalletButton({
   // Check if current network is supported
   const isSupportedNetwork = chainId && supportedNetworks[chainId];
 
-  // Initialize and listen for account/chain changes
+  // Initialize provider if not already connected
   useEffect(() => {
-    if (typeof window.ethereum === "undefined") return;
-
-    const handleAccountsChanged = (accounts) => {
-      setAccount(accounts[0] || null);
-    };
-
-    const handleChainChanged = (chainId) => {
-      setChainId(parseInt(chainId, 16));
-    };
-
-    // Check if already connected
-    const checkConnection = async () => {
-      const provider = new BrowserProvider(window.ethereum);
-      const accounts = await provider.send("eth_accounts", []);
-      if (accounts.length > 0) {
-        setAccount(accounts[0]);
-        const network = await provider.getNetwork();
-        setChainId(network.chainId);
-      }
-    };
-
-    checkConnection();
-
-    window.ethereum.on("accountsChanged", handleAccountsChanged);
-    window.ethereum.on("chainChanged", handleChainChanged);
-
-    return () => {
-      window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
-      window.ethereum.removeListener("chainChanged", handleChainChanged);
-    };
-  }, []);
+    if (!account && typeof window.ethereum !== "undefined") {
+      const checkConnection = async () => {
+        try {
+          const accounts = await window.ethereum.request({
+            method: "eth_accounts",
+          });
+          if (accounts.length > 0 && provider) {
+            // Account and chainId will be updated via context
+            await provider.send("eth_requestAccounts", []);
+          }
+        } catch (error) {
+          console.error("Error checking connection:", error);
+        }
+      };
+      checkConnection();
+    }
+  }, [account, provider]);
 
   const connectWallet = async () => {
     if (typeof window.ethereum === "undefined") {
@@ -65,14 +50,13 @@ export default function ConnectWalletButton({
 
     try {
       setIsConnecting(true);
-      const provider = new BrowserProvider(window.ethereum);
-      const accounts = await provider.send("eth_requestAccounts", []);
-      const network = await provider.getNetwork();
-
-      setAccount(accounts[0]);
-      setChainId(network.chainId);
+      if (!provider) {
+        throw new Error("Wallet provider not initialized");
+      }
+      await provider.send("eth_requestAccounts", []);
     } catch (error) {
       console.error("Error connecting wallet:", error);
+      alert(`Failed to connect wallet: ${error.message}`);
     } finally {
       setIsConnecting(false);
     }
