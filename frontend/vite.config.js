@@ -1,12 +1,25 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import path from "path";
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  build: {
-    rollupOptions: {
-      external: ["aos/dist/aos.css"],
+  resolve: {
+    alias: {
+      "aos/dist/aos.css": path.resolve(
+        __dirname,
+        "node_modules/aos/dist/aos.css"
+      ),
+    },
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        additionalData: `@import "${path.resolve(
+          __dirname,
+          "node_modules/aos/dist/aos.css"
+        )}";`,
+      },
     },
   },
 });
