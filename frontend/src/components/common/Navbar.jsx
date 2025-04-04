@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import ConnectWalletButton from "./ConnectWalletButton";
 
 export default function Navbar() {
   return (
@@ -9,7 +10,7 @@ export default function Navbar() {
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="flex items-center">
               <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                CrowdFund
+                DecentraFund
               </span>
             </Link>
           </div>
@@ -40,23 +41,7 @@ export default function Navbar() {
             >
               Start a Campaign
             </Link>
-            <button className="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              Connect Wallet
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="ml-2 -mr-1 h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
-            </button>
+            <ConnectWalletButton className="ml-4" />
           </div>
 
           {/* Mobile menu button */}
@@ -79,7 +64,7 @@ export default function Navbar() {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth="2"
+                  strokeWidth={2}
                   d="M4 6h16M4 12h16M4 18h16"
                 />
               </svg>
@@ -115,9 +100,7 @@ export default function Navbar() {
           >
             Start a Campaign
           </Link>
-          <button className="w-full flex justify-center items-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
-            Connect Wallet
-          </button>
+          <ConnectWalletButton variant="mobile" />
         </div>
       </div>
     </nav>

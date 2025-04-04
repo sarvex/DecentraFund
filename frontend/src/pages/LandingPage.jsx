@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import CampaignCard from "../components/campaign/CampaignCard";
+import ConnectWalletButton from "../components/common/ConnectWalletButton";
 import { useEffect } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -69,9 +70,14 @@ export default function LandingPage() {
               data-aos="fade-right"
               data-aos-delay="100"
             >
-              <h1 className="text-5xl md:text-6xl font-bold leading-tight">
-                Bring <span className="text-teal-300">Creative</span> Projects
-                to Life
+              <h1 className="text-5xl md:text-7xl font-bold leading-tight">
+                Welcome to{" "}
+                <span className="relative inline-block">
+                  <span className="relative  text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-500 animate-text-shine">
+                    DecentraFund
+                  </span>
+                  <span className="absolute inset-0 z-0 bg-gradient-to-r from-teal-500/20 to-emerald-500/20 blur-lg rounded-full animate-pulse-slow"></span>
+                </span>
               </h1>
               <p
                 className="text-xl text-indigo-100 max-w-2xl"
@@ -92,12 +98,7 @@ export default function LandingPage() {
                 >
                   Explore Projects
                 </Link>
-                <Link
-                  to="/dashboard"
-                  className="border-2 border-white text-white px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover:bg-white/10 text-center"
-                >
-                  Start Your Journey
-                </Link>
+                <ConnectWalletButton variant="landing" />
               </div>
             </div>
             <div

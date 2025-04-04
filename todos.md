@@ -107,7 +107,7 @@ Here's a comprehensive, step-by-step checklist to build your platform from start
 
 ### Blockchain Integration
 
-- [ ] **Wallet connection**
+- [done] **Wallet connection**
 
   - Implement MetaMask/wallet connect
   - Add network detection
