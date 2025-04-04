@@ -1,0 +1,11 @@
+# Ignore files
+
+node_modules
+_.log
+_.md
+_.toml
+_.txt
+test/
+contracts/
+scripts/
+lib/

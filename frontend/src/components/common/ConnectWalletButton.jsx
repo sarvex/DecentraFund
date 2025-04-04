@@ -13,6 +13,7 @@ export default function ConnectWalletButton({
   const supportedNetworks = {
     1: "Ethereum",
     5: "Goerli",
+    11155111: "Sepolia",
     137: "Polygon",
     80001: "Mumbai",
     56: "Binance",
