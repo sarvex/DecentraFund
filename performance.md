@@ -39,23 +39,47 @@
 
 ### Effort Estimate
 
-- **Audit and Benchmarking:** 2 days
-- **Implement Virtualization, Debouncing, and State Optimization:** 4 days
-- **Code Splitting, Asset Optimization, and Lazy Loading:** 2 days
-- **Accessibility and Animation Tuning:** 2 days
-- **Total Estimate:** 10 days (at 4 hours/day, with buffer)
+_All estimates below assume 4 hours of focused work per day._
+
+- **Audit and Benchmarking:** 4 days
+- **Implement Virtualization, Debouncing, and State Optimization:** 8 days
+- **Code Splitting, Asset Optimization, and Lazy Loading:** 4 days
+- **Accessibility and Animation Tuning:** 4 days
+- **Total Estimate:** 20 days (at 4 hours/day, with buffer)
+
+---
+
+## Frontend Framework Migration
+
+### Overview
+
+- Migrating the frontend from React.js to a modern framework (e.g., Next.js, Vue, Svelte) can improve maintainability, performance, and scalability.
+- Migration involves codebase analysis, component refactoring, state management adaptation, routing changes, and integration with existing backend/smart contracts.
+
+### Effort Estimate
+
+_All estimates below assume 4 hours of focused work per day._
+
+- **Codebase Audit & Migration Planning:** 4 days
+- **Component & Page Migration:** 16 days
+- **State Management & Data Fetching Adaptation:** 6 days
+- **Routing, Asset, and Style Migration:** 4 days
+- **Testing & Bug Fixes:** 6 days
+- **Documentation & Developer Onboarding:** 4 days
+- **Total Estimate:** 40 days (at 4 hours/day, with buffer)
 
 ---
 
 ## Summary Table
 
-| Task                                                      | Estimated Time (days) |
-|-----------------------------------------------------------|----------------------|
-| Blockchain throughput to 100M TPS (theoretical)           | 460                  |
-| Frontend responsiveness (highly responsive UI)            | 10                   |
+| Task                                                       | Estimated Time (days at 4 hours/day) |
+| ---------------------------------------------------------- | ------------------------------------ |
+| Blockchain throughput to 100M TPS (theoretical)            | 460                                  |
+| Frontend responsiveness (highly responsive UI)             | 30                                   |
+| Frontend framework migration (React.js → modern framework) | 70                                   |
 
 ---
 
-**Total (with buffer):** 470 days (at 4 hours/day)
+**Total (with buffer):** 520 days (at 4 hours/day)
 
 > **Disclaimer:** 100M TPS is far beyond the scope of current public blockchain tech and would require protocol-level and hardware innovation. Frontend responsiveness improvements are practical and can be achieved with focused effort.
