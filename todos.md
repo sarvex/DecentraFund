@@ -4,191 +4,132 @@ Here's a comprehensive, step-by-step checklist to build your platform from start
 
 ## Phase 1: Setup & Preparation
 
-- [done] **Set up development environment**
+- [x] **Set up development environment**
 
-  - Install Foundry (`curl -L https://foundry.paradigm.xyz | bash`)
-  - Install Node.js (v18+ recommended)
-  - Set up code editor (VS Code with Solidity plugins)
-  - Install Git for version control
+  - All tools and dependencies installed; see README for details.
 
-- [done] **Initialize project structure**
-  - Create project directory
-  - Initialize Foundry project (`forge init`)
-  - Set up React frontend (`npx create-react-app frontend --template typescript`)
-  - Create basic folder structure (`contracts`, `tests`, `scripts`, `frontend/src`)
+- [x] **Initialize project structure**
+  - Foundry, React frontend, and folder structure present.
 
 ## Phase 2: Smart Contract Development
 
 ### Core Contracts
 
-- [done] **Factory Contract**
+- [x] **Factory Contract**
 
-  - Implement `createCampaign()` function
-  - Add campaign tracking and statistics
-  - Set up platform fee mechanism
+  - `createCampaign()` and campaign tracking implemented in CrowdfundingFactory.sol.
+  - Platform fee mechanism present.
 
-- [done] **Campaign Contract**
+- [x] **Campaign Contract**
 
-  - Create campaign state variables (goal, deadline, raised amount)
-  - Implement contribution functionality
-  - Add refund mechanism for failed campaigns
-  - Create withdrawal function for successful campaigns
+  - State variables, contribution, refund, and withdrawal logic implemented in CrowdfundingCampaign.sol.
 
-- [done] **Escrow Contract**
-  - Implement secure fund holding
-  - Add conditional release functions
-  - Create refund distribution mechanism
+- [x] **Escrow Contract**
+  - Secure fund holding, conditional release, and refund logic in EscrowManager.sol.
 
 ### Testing
 
-- [done] **Write comprehensive tests**
+- [x] **Write comprehensive tests**
 
-  - Test campaign creation
-  - Test contribution scenarios
-  - Test successful/failed campaign outcomes
-  - Test edge cases and security vulnerabilities
+  - Unit and integration tests in test/ directory.
 
-- [done] **Run tests**
-  - `forge test` for unit tests
-  - Add integration tests
-  - Set up gas usage reports
+- [x] **Run tests**
+  - `forge test` and gas usage reports implemented.
 
 ## Phase 3: Advanced Smart Contract Features
 
-- [done] **Add ERC20 support**
+- [x] **Add ERC20 support**
 
-  - Modify contribution functions
-  - Add token approval checks
-  - Test with multiple token types
+  - ERC20 logic and tests present.
 
-- [done] **Implement funding tiers**
+- [x] **Implement funding tiers**
 
-  - Add reward tier structure
-  - Create tier-based contribution logic
-  - Test reward distribution
+  - Reward tier structure and logic implemented.
 
-- [done] **Governance system**
+- [x] **Governance system**
 
-  - Deploy governance token
-  - Implement voting mechanisms
-  - Create dispute resolution flow
+  - Governance token and voting logic present.
 
-- [done] **Security enhancements**
-  - Add reentrancy guards
-  - Implement time locks
-  - Add access control modifiers
+- [x] **Security enhancements**
+  - Reentrancy guards, time locks, and access control implemented.
 
 ## Phase 4: Frontend Development
 
 ### Core Components
 
-- [done] **Landing page**
+- [x] **Landing page**
 
-  - Create hero section
-  - Add featured campaigns display
-  - Build navigation
+  - Hero, featured campaigns, and navigation in LandingPage.jsx and Navbar.jsx.
 
-- [done] **Campaign browser**
+- [x] **Campaign browser**
 
-  - Implement filtering/sorting
-  - Create search functionality
-  - Add pagination
+  - Filtering, search, and pagination in CampaignBrowser.jsx and SearchFilter.jsx.
 
-- [done] **Campaign detail page**
+- [x] **Campaign detail page**
 
-  - Build funding progress display
-  - Create contribution form
-  - Add backer comments section
+  - Progress, contribution, and comments in CampaignDetails.jsx.
 
-- [done] **User dashboard**
-  - Creator view (campaign management)
-  - Backer view (contributions/rewards)
-  - Admin view (moderation tools)
+- [x] **User dashboard**
+  - Creator/backer views in Dashboard.jsx. Admin view not started.
 
 ### Blockchain Integration
 
-- [done] **Wallet connection**
+- [x] **Wallet connection**
 
-  - Implement MetaMask/wallet connect
-  - Add network detection
-  - Handle chain switching
+  - MetaMask/wallet connect, network detection, and chain switching implemented.
 
-- [done] **Contract interaction**
+- [x] **Contract interaction**
 
-  - Set up ethers.js
-  - Create hooks for contract calls
-  - Implement transaction status tracking
+  - ethers.js, contract hooks, and transaction status tracking in useContract.js.
 
 - [ ] **Data indexing**
-  - Set up The Graph subgraph
-  - Create queries for campaign data
-  - Implement real-time updates
+  - The Graph subgraph and real-time updates not implemented.
 
 ## Phase 5: Deployment & Testing
 
 ### Smart Contracts
 
-- [done] **Deploy to testnet**
+- [x] **Deploy to testnet**
 
-  - Choose testnet (Sepolia, Goerli)
-  - Write deployment scripts
-  - Verify contracts on Etherscan
+  - Deployment scripts and testnet verification complete.
 
 - [ ] **Test in production-like environment**
-  - Test all contract functions
-  - Simulate user flows
-  - Check gas costs
+  - Manual and automated production tests pending.
 
 ### Frontend
 
 - [ ] **Deploy frontend**
 
-  - Set up hosting (Vercel, Netlify, or IPFS)
-  - Configure environment variables
-  - Deploy to test domain
+  - Hosting and environment configuration not yet complete.
 
 - [ ] **End-to-end testing**
-  - Test complete user journeys
-  - Check mobile responsiveness
-  - Test with multiple wallets
+  - E2E tests and mobile checks not implemented.
 
 ## Phase 6: Security & Optimization
 
 - [ ] **Security audit**
 
-  - Run static analysis tools (Slither, MythX)
-  - Conduct manual code review
-  - Fix identified vulnerabilities
+  - Static analysis and manual review pending.
 
 - [ ] **Gas optimization**
 
-  - Analyze gas-heavy functions
-  - Implement optimizations
-  - Re-test after changes
+  - Further optimization and retesting needed.
 
 - [ ] **User feedback**
-  - Conduct beta testing
-  - Gather user feedback
-  - Implement improvements
+  - Beta testing and feedback collection not started.
 
 ## Phase 7: Mainnet Launch
 
 - [ ] **Final preparations**
 
-  - Deploy to mainnet
-  - Verify all contracts
-  - Set up monitoring
+  - Mainnet deployment and monitoring not started.
 
 - [ ] **Launch marketing**
 
-  - Create documentation
-  - Announce on social media
-  - Engage with communities
+  - Documentation, social media, and community engagement pending.
 
 - [ ] **Post-launch**
-  - Monitor platform activity
-  - Address any issues
-  - Plan feature updates
+  - Ongoing monitoring and updates planned.
 
 ## Additional Optional Items
 
@@ -197,3 +138,61 @@ Here's a comprehensive, step-by-step checklist to build your platform from start
 - [ ] Create mobile app version
 - [ ] Develop affiliate/referral system
 - [ ] Add advanced analytics dashboard
+
+# Decentralized Crowdfunding Platform TODOs (Synced with status.md)
+
+## Smart Contract Integration
+
+- [partial] Audit and optimization (manual review, static analysis pending)
+- [done] Event emission for key actions
+- [done] Campaign categorization
+- [ ] Badges/advanced withdrawal conditions
+- [done] Comprehensive contract testing
+
+## Blockchain Interaction (Web3.js/ethers.js)
+
+- [done] Wallet connectivity (MetaMask, WalletConnect)
+- [done] Smart contract calls (all major flows)
+- [partial] Event-based listeners (real-time updates, improve polling)
+- [partial] Wallet/network change handling (advanced UX improvements)
+
+## Frontend Development (React.js)
+
+- [done] Home page
+- [done] Campaign creation page
+- [done] Campaign detail page
+- [done] User dashboard (creator/backer views)
+- [ ] Admin panel (optional)
+- [partial] UI/UX enhancements (polish, accessibility, responsiveness)
+- [done] Filtering/sorting/search
+- [done] Reusable components
+
+## Deployment & Quality Assurance
+
+- [done] Contract deployment to testnet
+- [ ] Frontend deployment (Vercel/Netlify/IPFS)
+- [ ] Automated tests (frontend)
+- [ ] Monitoring/analytics (Sentry, LogRocket, etc)
+
+## Documentation & Workflow
+
+- [partial] Technical documentation (expand, keep up-to-date)
+- [done] Development environment (clean, reproducible)
+- [done] GitHub workflow
+- [ ] Communication cadence (define and document regular updates)
+
+## Dependency & Code Quality
+
+- [ ] Dependency migration (update all dependencies)
+- [ ] Library upgrade (latest stable versions)
+- [ ] Refactoring (maintainability, best practices)
+- [ ] Quality checks (linting, formatting, static analysis, code review)
+
+## Optional & Advanced Features
+
+- [ ] IPFS integration for media storage
+- [ ] Multi-language support (i18n)
+- [ ] Mobile app version
+- [ ] Affiliate/referral system
+- [ ] Advanced analytics dashboard
+- [ ] The Graph subgraph/data indexing
