@@ -143,42 +143,42 @@ Here's a comprehensive, step-by-step checklist to build your platform from start
 
 ## Smart Contract Integration
 
-- [partial] Audit and optimization (manual review, static analysis pending)
-- [done] Event emission for key actions
-- [done] Campaign categorization
+- [ ] Audit and optimization (manual review, static analysis pending)
+- [x] Event emission for key actions
+- [x] Campaign categorization
 - [ ] Badges/advanced withdrawal conditions
-- [done] Comprehensive contract testing
+- [x] Comprehensive contract testing
 
 ## Blockchain Interaction (Web3.js/ethers.js)
 
-- [done] Wallet connectivity (MetaMask, WalletConnect)
-- [done] Smart contract calls (all major flows)
-- [partial] Event-based listeners (real-time updates, improve polling)
-- [partial] Wallet/network change handling (advanced UX improvements)
+- [x] Wallet connectivity (MetaMask, WalletConnect)
+- [x] Smart contract calls (all major flows)
+- [ ] Event-based listeners (real-time updates, improve polling)
+- [ ] Wallet/network change handling (advanced UX improvements)
 
 ## Frontend Development (React.js)
 
-- [done] Home page
-- [done] Campaign creation page
-- [done] Campaign detail page
-- [done] User dashboard (creator/backer views)
+- [x] Home page
+- [x] Campaign creation page
+- [x] Campaign detail page
+- [x] User dashboard (creator/backer views)
 - [ ] Admin panel (optional)
-- [partial] UI/UX enhancements (polish, accessibility, responsiveness)
-- [done] Filtering/sorting/search
-- [done] Reusable components
+- [ ] UI/UX enhancements (polish, accessibility, responsiveness)
+- [x] Filtering/sorting/search
+- [x] Reusable components
 
 ## Deployment & Quality Assurance
 
-- [done] Contract deployment to testnet
+- [x] Contract deployment to testnet
 - [ ] Frontend deployment (Vercel/Netlify/IPFS)
 - [ ] Automated tests (frontend)
 - [ ] Monitoring/analytics (Sentry, LogRocket, etc)
 
 ## Documentation & Workflow
 
-- [partial] Technical documentation (expand, keep up-to-date)
-- [done] Development environment (clean, reproducible)
-- [done] GitHub workflow
+- [ ] Technical documentation (expand, keep up-to-date)
+- [x] Development environment (clean, reproducible)
+- [x] GitHub workflow
 - [ ] Communication cadence (define and document regular updates)
 
 ## Dependency & Code Quality
